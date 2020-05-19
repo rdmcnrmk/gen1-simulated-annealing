@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -11,21 +10,21 @@ public class World
     /// <summary>
     /// location list
     /// </summary>
-    public List<Vector2> Locations { get; set; }
+    public List<Vector3> Locations { get; set; }
 
     /// <summary>
     /// constructs a blank world
     /// </summary>
     public World()
     {
-        Locations = new List<Vector2>();
+        Locations = new List<Vector3>();
     }
 
     /// <summary>
     /// constructs a world with defined locations
     /// </summary>
     /// <param name="locations"></param>
-    public World(List<Vector2> locations)
+    public World(List<Vector3> locations)
     {
         Locations = locations;
     }
@@ -40,8 +39,8 @@ public class World
 
         for (int locIndex = 0; locIndex < Locations.Count; locIndex++)
         {
-            Vector2 fromLoc = Locations[locIndex];
-            Vector2 toLoc;
+            Vector3 fromLoc = Locations[locIndex];
+            Vector3 toLoc;
 
             if (locIndex + 1 < Locations.Count)
             {
@@ -52,7 +51,7 @@ public class World
                 toLoc = Locations[0];
             }
 
-            totalDistance += Vector2.Distance(fromLoc, toLoc);
+            totalDistance += Vector3.Distance(fromLoc, toLoc);
         }
         return totalDistance;
     }

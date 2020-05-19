@@ -29,7 +29,10 @@ public class CreativePart : MonoBehaviour
     [SerializeField]
     private float stdScale = 0.1f;
 
-    private List<Vector2> paths = new List<Vector2>();
+    [SerializeField]
+    private GameObject targetObj;
+
+    private List<Vector3> paths = new List<Vector3>();
 
     private SimulatedAnnealing sa;
 
@@ -41,8 +44,11 @@ public class CreativePart : MonoBehaviour
         {
             float angle = Random.Range(0, 2 * Mathf.PI);
             float r = Random.Range(minWorldRadius, maxWorldRadius);
-            initialWorld.Locations.Add(new Vector2(r * Mathf.Sin(angle), r * Mathf.Cos(angle)));
+            initialWorld.Locations.Add(new Vector3(r * Mathf.Sin(angle), r * Mathf.Cos(angle), r * Mathf.Cos(angle)));
         }
+
+        VertexProvider vProvider = new VertexProvider(targetObj.GetComponent<MeshFilter>().mesh, targetObj.transform);
+        initialWorld.Locations = vProvider.GetVertexSamples(1000);
 
         sa = new SimulatedAnnealing(initialTemp, coolingRate, initialWorld);
         sa.Findsolution();
@@ -64,21 +70,23 @@ public class CreativePart : MonoBehaviour
     /// </summary>
     /// <param name="pathPoints"> input positions</param>
     /// <returns> noised positions </returns>
-    List<Vector2> ComplexifyPath(List<Vector2> pathPoints)
+    List<Vector3> ComplexifyPath(List<Vector3> pathPoints)
     {
         //create a new path array from the old one by adding new points inbetween the old points
-        List<Vector2> newPath = new List<Vector2>();
+        List<Vector3> newPath = new List<Vector3>();
 
         for (int i = 0; i < pathPoints.Count - 1; i++)
         {
-            Vector2 v1 = pathPoints[i];
-            Vector2 v2 = pathPoints[i + 1];
-            Vector2 midPoint = (v1 + v2) * 0.5f;
-            float distance = Vector2.Distance(v1, v2);
+            Vector3 v1 = pathPoints[i];
+            Vector3 v2 = pathPoints[i + 1];
+            Vector3 midPoint = (v1 + v2) * 0.5f;
+            float distance = Vector3.Distance(v1, v2);
 
             //the new point is halfway between the old points, with some gaussian variation
             float standardDeviation = stdScale * distance;
-            Vector2 v = new Vector2(midPoint.x + Random.Range(-standardDeviation, standardDeviation), midPoint.y + Random.Range(-standardDeviation, standardDeviation));
+            Vector3 v = new Vector3(midPoint.x + Random.Range(-standardDeviation, standardDeviation),
+                                    midPoint.y + Random.Range(-standardDeviation, standardDeviation),
+                                    midPoint.z + Random.Range(-standardDeviation, standardDeviation));
       
             newPath.Add(v1);
             newPath.Add(v);
@@ -97,7 +105,8 @@ public class CreativePart : MonoBehaviour
             counter++;
         }
 
-        paths = sa.solutions[counter];
+        counter = sa.solutions.Count - 1;
+        paths = sa.solutions[counter].Item1;
         for (var j = 0; j < complexifyPower; j++)
         {
             paths = ComplexifyPath(paths);
